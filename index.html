@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>Заметки</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-black">
+<div class="app" id="app">
+  <div class="dashboard">
+    <div class="sidebar">
+      <h1>📝 Заметки</h1>
+      <div class="nav-item active" data-tab="songs" id="tab-songs"><span>🎵</span> Песни</div>
+      <div class="nav-item" data-tab="books" id="tab-books"><span>📚</span> Книги</div>
+      <div class="nav-item" data-tab="films" id="tab-films"><span>🎬</span> Фильмы</div>
+      <div class="nav-item" data-tab="notes" id="tab-notes"><span>📝</span> Заметки</div>
+      <div class="nav-item" data-tab="trash" id="tab-trash"><span>🗑️</span> Корзина</div>
+      <div class="divider"></div>
+      <div class="nav-item" id="filter-favorite"><span>⭐</span> Только избранное</div>
+      <div class="nav-item" id="show-archive"><span>📦</span> Показать архив</div>
+      <div class="nav-item" id="open-bg-modal"><span>🖼️</span> Выбрать фон</div>
+      <div class="divider"></div>
+      <div class="block-label" style="margin-top:8px;">🔀 СОРТИРОВКА</div>
+      <select class="tag" id="sort-select" style="width:100%; margin-bottom:20px; font-size:14px; padding:10px;">
+        <option value="newest">Сначала новые</option>
+        <option value="oldest">Сначала старые</option>
+        <option value="title_asc">По названию А→Я</option>
+        <option value="rating_desc">По рейтингу (высокий)</option>
+        <option value="manual">Вручную (drag & drop)</option>
+      </select>
+      <div class="stats-preview" id="stats-preview">
+        <span>📊 СТАТИСТИКА</span>
+        <span class="arrow">▶</span>
+      </div>
+      <div class="stats-detail" id="stats-detail">
+        <div class="stat-item">🎵 Песен: <span id="stat-songs">0</span></div>
+        <div class="stat-item">📚 Книг: <span id="stat-books">0</span></div>
+        <div class="stat-item">🎬 Фильмов: <span id="stat-films">0</span></div>
+        <div class="stat-item">📝 Заметок: <span id="stat-notes">0</span></div>
+        <div class="stat-item">⭐ В избранном: <span id="stat-fav">0</span></div>
+        <div class="stat-item">🗑️ В корзине: <span id="stat-trash">0</span></div>
+      </div>
+      <div class="divider"></div>
+      <div class="collapsible-header" id="data-header">
+        <span class="block-label">💾 УПРАВЛЕНИЕ ДАННЫМИ</span>
+        <span class="arrow">▶</span>
+      </div>
+      <div class="collapsible-content" id="data-content">
+        <button class="nav-item" id="export-data">📤 Экспорт JSON</button>
+        <button class="nav-item" id="export-txt">📄 Экспорт TXT</button>
+        <button class="nav-item" id="import-data">📥 Импорт JSON</button>
+        <button class="nav-item" id="import-csv">📥 Импорт CSV</button>
+        <input type="file" id="import-file" accept=".json,.csv" style="display:none;">
+      </div>
+    </div>
+    <div class="main-panel" id="mainPanel">
+      <div class="search-bar" id="action-bar">
+        <input type="text" id="global-search" placeholder="🔍 Поиск по записям...">
+        <button class="btn-icon" id="filter-toggle">🔍 Фильтры</button>
+        <button class="btn-icon" id="random-item">🎲 Случайная</button>
+        <button class="btn-icon" id="clear-filters">✕ Сбросить</button>
+        <button class="btn-icon" id="share-list">📋 Копировать список</button>
+        <div style="display:flex; gap:4px;">
+          <button class="btn-icon" id="view-list" title="Список">📋</button>
+          <button class="btn-icon" id="view-grid" title="Сетка">🔲</button>
+        </div>
+      </div>
+      <div class="filter-panel" id="filter-panel">
+        <div class="filter-group">
+          <span class="group-label">Статус</span>
+          <div><input type="checkbox" id="filter-status-read"> Прочитано</div>
+          <div><input type="checkbox" id="filter-status-reading"> В процессе</div>
+          <div><input type="checkbox" id="filter-status-dropped"> Брошено</div>
+          <div><input type="checkbox" id="filter-status-planned"> Запланировано</div>
+        </div>
+        <div class="filter-group">
+          <span class="group-label">Мин. рейтинг</span>
+          <select id="filter-rating">
+            <option value="0">Любой</option>
+            <option value="1">1 ★</option><option value="2">2 ★</option><option value="3">3 ★</option>
+            <option value="4">4 ★</option><option value="5">5 ★</option><option value="6">6 ★</option>
+            <option value="7">7 ★</option><option value="8">8 ★</option><option value="9">9 ★</option>
+            <option value="10">10 ★</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <span class="group-label">Период</span>
+          <select id="filter-period">
+            <option value="all">Всё время</option>
+            <option value="today">Сегодня</option>
+            <option value="week">Неделя</option>
+            <option value="month">Месяц</option>
+          </select>
+        </div>
+        <button class="btn-icon" id="apply-filters">Применить</button>
+      </div>
+      <div class="quote-of-day" id="quoteContainer">
+        <span class="quote-content" id="quoteText">Загрузка...</span>
+        <span class="quote-refresh" id="refreshQuote">🔄</span>
+      </div>
+      <div id="tab-content"></div>
+    </div>
+  </div>
+  <div class="view-modal" id="view-modal">
+    <div class="view-modal-content" id="view-modal-content">
+      <span class="view-modal-close" id="view-modal-close">&times;</span>
+      <div id="view-modal-body"></div>
+    </div>
+  </div>
+  <div class="modal" id="edit-modal">
+    <div class="modal-content">
+      <span class="modal-close" id="edit-modal-close">&times;</span>
+      <h2>✎ Редактирование</h2>
+      <form id="edit-form">
+        <div class="edit-field edit-song-field" style="display:none;">
+          <div class="form-group">
+            <label for="edit-song-title">Название</label>
+            <input type="text" id="edit-song-title">
+          </div>
+          <div class="form-group">
+            <label for="edit-song-artist">Исполнитель</label>
+            <input type="text" id="edit-song-artist">
+          </div>
+        </div>
+        <div class="edit-field edit-books-field" style="display:none;">
+          <div class="form-group">
+            <label for="edit-books-title">Название</label>
+            <input type="text" id="edit-books-title">
+          </div>
+          <div class="form-group">
+            <label for="edit-books-author">Автор</label>
+            <input type="text" id="edit-books-author">
+          </div>
+          <div class="form-group">
+            <label for="edit-books-chapter">Глава</label>
+            <input type="number" id="edit-books-chapter">
+          </div>
+          <div class="form-group">
+            <label for="edit-books-totalChapters">Всего глав</label>
+            <input type="number" id="edit-books-totalChapters">
+          </div>
+        </div>
+        <div class="edit-field edit-films-field" style="display:none;">
+          <div class="form-group">
+            <label for="edit-films-title">Название</label>
+            <input type="text" id="edit-films-title">
+          </div>
+          <div class="form-group">
+            <label for="edit-films-season">Сезон</label>
+            <input type="text" id="edit-films-season">
+          </div>
+        </div>
+        <div class="edit-field edit-notes-field" style="display:none;">
+          <div class="form-group">
+            <label for="edit-notes-text">Текст</label>
+            <textarea id="edit-notes-text"></textarea>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="edit-common-link">Ссылка</label>
+          <input type="url" id="edit-common-link">
+        </div>
+        <div class="form-group">
+          <label for="edit-common-rating">Оценка</label>
+          <select id="edit-common-rating">
+            <option value="0">— нет —</option>
+            <option value="1">1 ★</option><option value="2">2 ★</option><option value="3">3 ★</option>
+            <option value="4">4 ★</option><option value="5">5 ★</option><option value="6">6 ★</option>
+            <option value="7">7 ★</option><option value="8">8 ★</option><option value="9">9 ★</option>
+            <option value="10">10 ★</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="edit-common-status">Статус</label>
+          <select id="edit-common-status">
+            <option value="">— нет —</option>
+            <option value="Прослушано">Прослушано</option>
+            <option value="Прочитано">Прочитано</option>
+            <option value="Просмотрено">Просмотрено</option>
+            <option value="В процессе">В процессе</option>
+            <option value="Брошено">Брошено</option>
+            <option value="Запланировано">Запланировано</option>
+          </select>
+        </div>
+        <div style="display:flex; gap:10px; margin-top:20px;">
+          <button type="button" class="btn-primary" id="edit-save-btn">💾 Сохранить</button>
+          <button type="button" class="btn-icon" id="edit-cancel-btn">Отмена</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div class="toast-container" id="toast-container"></div>
+</div>
+<script type="module" src="src/renderer.js"></script>
+</body>
+</html>
